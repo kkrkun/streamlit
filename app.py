@@ -223,7 +223,13 @@ if 'process' not in st.session_state:
     st.session_state.process = None
 if 'output_lines' not in st.session_state:
     st.session_state.output_lines = []
-
+if 'room_id' not in st.session_state:
+    st.session_state.room_id = None
+if 'vc_url' not in st.session_state:
+    st.session_state.vc_url = None
+if 'mc_connect_command' not in st.session_state:
+    st.session_state.mc_connect_command = None
+    
 # 2つの列を作成
 upload_col, lang_col= st.columns(2)
 
@@ -456,6 +462,9 @@ if not st.session_state.is_running:
     # --- 停止中のUI ---
     if st.button(translations.get("start", "Start Proximity VC"), type="primary", use_container_width=True):
         st.session_state.output_lines = []
+        st.session_state.room_id = None
+        st.session_state.vc_url = None
+        st.session_state.mc_connect_command = None
         # 1. node_modulesディレクトリが存在するかチェック
         if not os.path.isdir('node_modules'):
             st.info(translations.get("install",
@@ -527,10 +536,38 @@ if st.session_state.is_running:
                     break
                 clean_line = strip_ansi_codes(line)
 
-                st.session_state.output_lines.append(clean_line)
+                   # ROOM IDを抽出
+                if "ROOM ID:" in clean_line:
+                    match = re.search(r"ROOM ID: (.*)", clean_line)
+                    if match:
+                        st.session_state.room_id = match.group(1).strip()
+                        st.write("Room ID:")
+                        st.code(st.session_state.room_id,
+                                language=None, width="content")
 
-                placeholder.code("".join(st.session_state.output_lines))
+                # URLを抽出
+                if "https://proximity-vc-mcbe.pages.dev" in clean_line:
+                    match = re.search(
+                        r"(https://proximity-vc-mcbe\.pages\.dev\?roomid=\w+)", clean_line)
+                    if match:
+                        st.session_state.vc_url = match.group(1).strip()
+                        st.write(translations.get(
+                            "vc_url", "Participants should access this URL"))
+                        st.code(st.session_state.vc_url,
+                                language=None, width="content")
 
+
+                # /connectコマンドを抽出
+                if "/connect" in clean_line:
+                    match = re.search(r"(/connect .*)", clean_line)
+                    if match:
+                        st.session_state.mc_connect_command = match.group(
+                            1).strip()
+                        st.write(translations.get(
+                            "mc_connect", "Connect from Minecraft with the following command:"))
+                        st.code(st.session_state.mc_connect_command,
+                                language=None, width="content")
+            
             # プロセスが自然に終了した場合の処理
             process.wait()
             stderr_output = process.stderr.read()
