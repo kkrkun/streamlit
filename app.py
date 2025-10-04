@@ -252,47 +252,46 @@ with lang_col:
     )
     
 
-if width is not None:
-    prox_col, dis_col, pass_col, spec_col = st.columns([1.3, 1.5, 2, 2])
-    with prox_col:
-        st.write("")
-        st.write("")
-        proximity = st.toggle(
-            label=translations.get('prox_col', 'Enable proximity VC'),
-            help=translations.get("default_enabled", "Default: Enabled"),
-            key='proximity',
-            disabled=st.session_state.is_running
-        )
-    with dis_col:
-        distance = st.number_input(
-            label=translations.get(
-                'dis_col', 'Maximum block distance for voice to reach'),
-            min_value=0.0,
-            step=0.5,
-            help=translations.get("def_dis", "Default: 10"),
-            key='distance',
-            disabled=not proximity or st.session_state.is_running
-        )
-    with pass_col:
-        st.write("")
-        st.write("")
-        password = st.toggle(
-            label=translations.get(
-                'pass_col', 'Require password for VC connection'),
-            help=translations.get("default_disabled", "Default: Disabled"),
-            key='password',
-            disabled=not proximity or st.session_state.is_running
-        )
-    with spec_col:
-        st.write("")
-        st.write("")
-        spectator = st.toggle(
-            label=translations.get(
-                'spec_col', 'Separate VC for players in Spectator mode'),
-            help=translations.get("default_enabled", "Default: Enabled"),
-            key='spectator',
-            disabled=not proximity or st.session_state.is_running
-        )
+prox_col, dis_col, pass_col, spec_col = st.columns([1.3, 1.5, 2, 2])
+with prox_col:
+    st.write("")
+    st.write("")
+    proximity = st.toggle(
+        label=translations.get('prox_col', 'Enable proximity VC'),
+        help=translations.get("default_enabled", "Default: Enabled"),
+        key='proximity',
+        disabled=st.session_state.is_running
+    )
+with dis_col:
+    distance = st.number_input(
+        label=translations.get(
+            'dis_col', 'Maximum block distance for voice to reach'),
+        min_value=0.0,
+        step=0.5,
+        help=translations.get("def_dis", "Default: 10"),
+        key='distance',
+        disabled=not proximity or st.session_state.is_running
+    )
+with pass_col:
+    st.write("")
+    st.write("")
+    password = st.toggle(
+        label=translations.get(
+            'pass_col', 'Require password for VC connection'),
+        help=translations.get("default_disabled", "Default: Disabled"),
+        key='password',
+        disabled=not proximity or st.session_state.is_running
+    )
+with spec_col:
+    st.write("")
+    st.write("")
+    spectator = st.toggle(
+        label=translations.get(
+            'spec_col', 'Separate VC for players in Spectator mode'),
+        help=translations.get("default_enabled", "Default: Enabled"),
+        key='spectator',
+        disabled=not proximity or st.session_state.is_running
+    )
 
 specDim_col, specListen_col, = st.columns(2)
 with specDim_col:
