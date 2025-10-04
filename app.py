@@ -387,6 +387,7 @@ def change_config():
         "distance": distance,
         "lang": langCode,
     }
+
     return new_config
 
 
@@ -396,9 +397,34 @@ if "show_download" not in st.session_state:
 
 # --- 遅延してボタンを表示 ---
 if st.session_state.show_download:
+    new_config = change_config()
+    config_string = f"""{{
+        "app_id": "{new_config["app_id"]}",   // SkyWayのアプリケーションID// SkyWay Application ID
+        "secret_key": "{new_config["secret_key"]}",   // SkyWayのシークレットキー// SkyWay Secret Key
+
+        "username": "{new_config["username"]}",   // TCP Exposerのユーザー名// TCP Exposer Username
+        "sub_domain": "{new_config["sub_domain"]}",   // RoomIDに使用するTCP Exposerのサブドメイン// TCP Exposer Subdomain (Used for RoomID)
+        "sub_domain2": "{new_config["sub_domain2"]}",   // minecraftとの連携に使用するTCP Exposerのサブドメイン（通常は空欄）// TCP Exposer Subdomain (Used for Minecraft Connection, usually left blank)
+        "ssh_password": "{new_config["ssh_password"]}",   // TCP Exposerのパスワード // TCP Exposer Password
+
+        "port": {new_config["port"]},   // minecraftとの連携に使用するポート番号// Port number used for Minecraft connection
+        "web_port": {new_config["web_port"]},   // Webサイトとの連携に使用するポート番号// Port number used for Website connection
+
+        "proximity": {str(new_config["proximity"]).lower()},   // 近接VCを有効にするか (デフォルト: true)// Enable Proximity VC (default: true)
+        "spectator": {str(new_config["spectator"]).lower()},   // スペクテイターモードのプレイヤーはVCを分けるか (デフォルト: true)// Separate VC for players in Spectator mode (default: true)
+
+        // "spectator"がtrueの場合のみ有効な設定// Settings effective only when "spectator" is true
+        "specListen": {str(new_config["specListen"]).lower()},   // スペクテイターが他モードプレイヤーの会話を聞けるようにするか (デフォルト: true)// Allow spectators to hear non-spectator players (default: true)
+        "specDim": {str(new_config["specDim"]).lower()},   // スペクテイター同士の会話をディメンションごとに分けるか (デフォルト: false)// Separate conversations among spectators by dimension (default: false)
+
+        "password": {str(new_config["password"]).lower()},   // 近接VC接続時にパスワードを要求するか (デフォルト: false)// Require password for Proximity VC connection (default: false)
+        "distance": {new_config["distance"]},   // ゲーム内で声が届く最大ブロック数 (デフォルト: 6.0)// Maximum block distance for voice to reach in-game (default: 6.0)
+        "lang": "{new_config["lang"]}"   // 表示言語の設定 ("ja" または "en")// Language setting ("ja" or "en")
+    }}
+    """
     st.download_button(
         label=translations.get("download_config", "Download Config File"),
-        data=json.dumps(change_config(), indent=4, ensure_ascii=False),
+        data=config_string,
         file_name="config.json",
         help=translations.get('download_config_description',
                               'You can download the current settings as a config.json file.'),
