@@ -222,7 +222,7 @@ if 'output_lines' not in st.session_state:
     st.session_state.output_lines = []
 
 # 2つの列を作成
-upload_col, lang_col, prox_col = st.columns(3)
+upload_col, lang_col= st.columns(2)
 
 # 1列目にファイルアップローダーを配置
 with upload_col:
@@ -249,20 +249,18 @@ with lang_col:
         disabled=st.session_state.is_running
     )
     
-with prox_col:
-    st.write("")
-    st.write("")
-    st.write("")
-    proximity = st.toggle(
-        label=translations.get('prox_col', 'Enable proximity VC'),
-        help=translations.get("default_enabled", "Default: Enabled"),
-        key='proximity',
-        disabled=st.session_state.is_running
-    )
 
 if width is not None:
-    dis_col, pass_col, spec_col, = st.columns([1.5, 2, 2])
-
+    prox_col, dis_col, pass_col, spec_col = st.columns([1.3, 1.5, 2, 2])
+    with prox_col:
+        st.write("")
+        st.write("")
+        proximity = st.toggle(
+            label=translations.get('prox_col', 'Enable proximity VC'),
+            help=translations.get("default_enabled", "Default: Enabled"),
+            key='proximity',
+            disabled=st.session_state.is_running
+        )
     with dis_col:
         distance = st.number_input(
             label=translations.get(
