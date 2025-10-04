@@ -44,17 +44,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-"""
-# ScreenDataでウィンドウサイズを含む色々な値を取得
-screenData = st_screen_stats.ScreenData()
-# on_changeに関数を指定すると、ウィンドウサイズが変更されたときにその関数が呼ばれる。指定してもしなくても再実行される
-screen_stats_result = screenData.st_screen_data(
-    key="screen_stats", on_change=onScreenSizeChange)
-if screen_stats_result is not None:
-    width = screen_stats_result.get("innerWidth", 1920)
-else:
-    width= 1920  # 初期値を設定（もしくは return で一時停止）
-"""
+
+#    # ScreenDataでウィンドウサイズを含む色々な値を取得
+#    screenData = st_screen_stats.ScreenData()
+#    # on_changeに関数を指定すると、ウィンドウサイズが変更されたときにその関数が呼ばれる。指定してもしなくても再実行される
+#    screen_stats_result = screenData.st_screen_data(
+#        key="screen_stats", on_change=onScreenSizeChange)
+#    if screen_stats_result is not None:
+#        width = screen_stats_result.get("innerWidth", 1920)
+#    else:
+#        width= 1920  # 初期値を設定（もしくは return で一時停止）
+
 
 # 1. ブラウザの言語設定を取得（ or "en" を削除）
 browser_lang_code = streamlit_js_eval(
