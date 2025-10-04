@@ -212,16 +212,25 @@ defaults = {
 for key, value in defaults.items():
     if key not in st.session_state:
         st.session_state[key] = value
+# is_running: プロセスが実行中かどうかのフラグ
+# process: Popenオブジェクトを保存する場所
+if 'is_running' not in st.session_state:
+    st.session_state.is_running = False
+if 'process' not in st.session_state:
+    st.session_state.process = None
+if 'output_lines' not in st.session_state:
+    st.session_state.output_lines = []
 
 # 2つの列を作成
-upload_col, lang_col = st.columns(2)
+upload_col, lang_col, prox_col = st.columns(3)
 
 # 1列目にファイルアップローダーを配置
 with upload_col:
     upload_file = st.file_uploader(
         label=translations.get("upload", "Upload Config File"),
         type=["json", "json5"],
-        key='file_uploader'
+        key='file_uploader',
+        disabled=st.session_state.is_running
     )
     if upload_file is not None:
         change_setting_result = change_setting(upload_file)
@@ -231,28 +240,29 @@ with upload_col:
 
 # 2列目に言語選択ボックスを配置
 with lang_col:
+    st.write("")
     language = st.selectbox(
         label=translations.get("language", "Language:"),
         options=langs,
         on_change=change_lang,
-        key="lang"
+        key="lang",
+        disabled=st.session_state.is_running
+    )
+    
+with prox_col:
+    st.write("")
+    st.write("")
+    st.write("")
+    proximity = st.toggle(
+        label=translations.get('prox_col', 'Enable proximity VC'),
+        help=translations.get("default_enabled", "Default: Enabled"),
+        key='proximity',
+        disabled=st.session_state.is_running
     )
 
 if width is not None:
-    if (width >= 1000):
-        prox_col, dis_col, pass_col, spec_col, = st.columns([1.3, 1.5, 2, 2])
-    else:
-        prox_col, dis_col = st.columns(2)
-        pass_col, spec_col = st.columns(2)
+    dis_col, pass_col, spec_col, = st.columns([1.5, 2, 2])
 
-    with prox_col:
-        st.write("")
-        st.write("")
-        proximity = st.toggle(
-            label=translations.get('prox_col', 'Enable proximity VC'),
-            help=translations.get("default_enabled", "Default: Enabled"),
-            key='proximity',
-        )
     with dis_col:
         distance = st.number_input(
             label=translations.get(
@@ -261,42 +271,37 @@ if width is not None:
             step=0.5,
             help=translations.get("def_dis", "Default: 10"),
             key='distance',
-            disabled=not proximity
+            disabled=not proximity or st.session_state.is_running
         )
     with pass_col:
-        if (width >= 1000):
-            st.write("")
-            st.write("")
+        st.write("")
+        st.write("")
         password = st.toggle(
             label=translations.get(
                 'pass_col', 'Require password for VC connection'),
             help=translations.get("default_disabled", "Default: Disabled"),
             key='password',
-            disabled=not proximity
+            disabled=not proximity or st.session_state.is_running
         )
     with spec_col:
-        if (width >= 1000):
-            st.write("")
-            st.write("")
+        st.write("")
+        st.write("")
         spectator = st.toggle(
             label=translations.get(
                 'spec_col', 'Separate VC for players in Spectator mode'),
             help=translations.get("default_enabled", "Default: Enabled"),
             key='spectator',
-            disabled=not proximity
+            disabled=not proximity or st.session_state.is_running
         )
 
-if (width >= 1000):
-    specDim_col, specListen_col, = st.columns([1.4, 2])
-else:
-    specDim_col, specListen_col, = st.columns(2)
+specDim_col, specListen_col, = st.columns(2)
 with specDim_col:
     specDim = st.toggle(
         label=translations.get(
             "specDim_col", "Separate spectator VC by dimension"),
         help=translations.get("default_disabled", "Default: Disabled"),
         key='specDim',
-        disabled=not spectator or not proximity
+        disabled=not spectator or not proximity or st.session_state.is_running
     )
 with specListen_col:
     specListen = st.toggle(
@@ -304,7 +309,7 @@ with specListen_col:
             "specListen_col", "Allow spectators to hear non-spectator players"),
         help=translations.get("default_enabled", "Default: Enabled"),
         key='specListen',
-        disabled=not spectator or not proximity
+        disabled=not spectator or not proximity or st.session_state.is_running
     )
 if not st.session_state.spectator:
     specDim = False
@@ -318,36 +323,42 @@ with st.expander(translations.get("advanced_settings", "Advanced Settings")):
     with username_col:
         userName = st.text_input(
             label=translations.get("username_col", "TCP Exposer Username"),
-            key='username'
+            key='username',
+            disabled=st.session_state.is_running
         )
     with tcp_pass_col:
         sshPassword = st.text_input(
             label=translations.get("ssh_password_col", "TCP Exposer Password"),
             type="password",
-            key='ssh_password'
+            key='ssh_password',
+            disabled=st.session_state.is_running
         )
     with sub_domain_col1:
         subDomain = st.text_input(
             label=translations.get(
                 "sub_domain_col", "TCP Exposer Subdomain for RoomID"),
-            key='sub_domain'
+            key='sub_domain',
+            disabled=st.session_state.is_running
         )
     with sub_domain_col2:
         subDomain2 = st.text_input(
             label=translations.get(
                 "sub_domain2_col", "TCP Exposer Subdomain for Minecraft"),
-            key='sub_domain2'
+            key='sub_domain2',
+            disabled=st.session_state.is_running
         )
     f"### {translations.get('skyway_settings_title', 'SkyWay Settings')}"
     f"{translations.get("skyway_settings_description", "SkyWay noise cancellation and other features can be used.")}"
     appId = st.text_input(
         label=translations.get("app_id_col", "SkyWay Application ID"),
-        key='app_id'
+        key='app_id',
+        disabled=st.session_state.is_running
     )
     secretKey = st.text_input(
         label=translations.get("secret_key_col", "SkyWay Secret Key"),
         type="password",
-        key="secret_key"
+        key="secret_key",
+        disabled=st.session_state.is_running
     )
 
 # --- 設定を構築する関数 ---
@@ -399,17 +410,7 @@ else:
     st.info("Loading download button...")
     st.session_state.show_download = True
 
-# --- 1. セッション状態の初期化 ---
-# is_running: プロセスが実行中かどうかのフラグ
-# process: Popenオブジェクトを保存する場所
-if 'is_running' not in st.session_state:
-    st.session_state.is_running = False
-if 'process' not in st.session_state:
-    st.session_state.process = None
-
 # ANSIコードを除去する関数（仮置き）
-
-
 def strip_ansi_codes(text):
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     return ansi_escape.sub('', text)
@@ -429,7 +430,7 @@ if not st.session_state.is_running:
 
     # --- 停止中のUI ---
     if st.button(translations.get("start", "Start Proximity VC"), type="primary", use_container_width=True):
-
+        st.session_state.output_lines = []
         # 1. node_modulesディレクトリが存在するかチェック
         if not os.path.isdir('node_modules'):
             st.info(translations.get("install",
@@ -485,29 +486,38 @@ else:
 # --- 3. プロセスの出力表示（実行中のみ動作） ---
 if st.session_state.is_running:
     placeholder = st.empty()
-    output_lines = []
+
+    # --- ログ表示部分 ---
+    # まず、rerun時点でsession_stateに保存されているログを再表示する
+    # これにより、他のUI操作でrerunがかかってもログが消えなくなる
+    if st.session_state.output_lines:
+        placeholder.code("".join(st.session_state.output_lines))
 
     process = st.session_state.process
     if process:
         try:
             # stdoutからリアルタイムで1行ずつ読み込む
-            # このループはブロッキングだが、停止ボタンが押されるとst.rerunで中断される
             for line in iter(process.stdout.readline, ''):
-                if not line:  # 出力がなくなったらループを抜ける
+                if not line:
                     break
                 clean_line = strip_ansi_codes(line)
-                output_lines.append(clean_line)
-                placeholder.code("".join(output_lines))
+
+                st.session_state.output_lines.append(clean_line)
+
+                placeholder.code("".join(st.session_state.output_lines))
 
             # プロセスが自然に終了した場合の処理
-            process.wait()  # 念のため終了を待つ
+            process.wait()
             stderr_output = process.stderr.read()
             if process.returncode != 0:
                 st.error("エラーが発生しました:")
                 st.code(stderr_output)
+                # エラーログもsession_stateに追加して残す
+                st.session_state.output_lines.append("\n--- ERROR ---\n")
+                st.session_state.output_lines.append(stderr_output)
             else:
                 st.success("Finish！")
-                time.sleep(2)  # 完了メッセージを2秒表示
+                time.sleep(2)
 
         except Exception as e:
             st.error(f"Error: {e}")
