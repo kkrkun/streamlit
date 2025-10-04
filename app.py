@@ -2,6 +2,7 @@ import streamlit as st
 import subprocess
 import time
 import re
+import os
 import json
 import json5
 from streamlit_js_eval import streamlit_js_eval
@@ -414,24 +415,47 @@ def strip_ansi_codes(text):
     return ansi_escape.sub('', text)
 
 
-# --- 2. UIの定義（実行中か否かで表示を切り替え） ---
 if not st.session_state.is_running:
     new_config = change_config()
 
     try:
         with open(CONFIG_FILE_PATH, 'w', encoding='utf-8') as f:
-            # json5.dump() を使って辞書をファイルに書き込む
             json5.dump(new_config, f, indent=2)
-
     except IOError as e:
         print(f"❌ 設定ファイルの上書き中にエラーが発生しました: {e}")
-# config.json を上書き保存
+
     with open("config.json", "w", encoding="utf-8") as f:
         json.dump(new_config, f, indent=4, ensure_ascii=False)
+
     # --- 停止中のUI ---
     if st.button(translations.get("start", "Start Proximity VC"), type="primary", use_container_width=True):
+
+        # 1. node_modulesディレクトリが存在するかチェック
+        if not os.path.isdir('node_modules'):
+            st.info(translations.get("install",
+                    "The required module was not found. Starting installation..."))
+            with st.spinner(translations.get("installing", "Installing...")):
+                try:
+                    # 2. npm install を実行 (完了を待つため Popen ではなく run を使用)
+                    result = subprocess.run(
+                        ['npm', 'install'],
+                        capture_output=True,  # 標準出力をキャプチャ
+                        text=True,           # テキストモードで扱う
+                        check=True           # エラー時に例外を発生させる
+                    )
+                    st.success(translations.get("install_success", "Installation succeeded."))
+
+                except subprocess.CalledProcessError as e:
+                    # 3. インストールに失敗した場合、エラーを表示して停止
+                    st.error(translations.get("install_failed", "Installation failed."))
+                    st.code(e.stderr)
+                    st.stop()
+
         # プロセスを開始する
+        with st.spinner(translations.get("starting", "Starting...")):
+            time.sleep(3)
         st.session_state.is_running = True
+
         # Popenでプロセスを開始し、セッション状態に保存
         process = subprocess.Popen(
             ['node', 'index.js'],
@@ -445,24 +469,21 @@ if not st.session_state.is_running:
         st.rerun()  # 画面を再描画して「実行中」のUIに切り替える
 
 else:
+    # (元のコードと同じ)
     # --- 実行中のUI ---
     if st.button(translations.get("stop", "Stop Proximity VC"), type="secondary", use_container_width=True):
-        # プロセスを停止する
         if st.session_state.process:
-            st.session_state.process.terminate()  # プロセスに終了シグナルを送信
-            st.session_state.process.wait()      # 完全に終了するのを待つ
+            st.session_state.process.terminate()
+            st.session_state.process.wait()
 
-        # 状態をリセット
         st.session_state.is_running = False
         st.session_state.process = None
         with st.spinner(translations.get("stopping", "Stopping...")):
-            time.sleep(3)  # メッセージを1秒表示
-        st.rerun()  # 画面を再描画して「停止中」のUIに戻す
+            time.sleep(3)
+        st.rerun()
 
 # --- 3. プロセスの出力表示（実行中のみ動作） ---
 if st.session_state.is_running:
-    with st.spinner(translations.get("starting", "Starting...")):
-        time.sleep(3)
     placeholder = st.empty()
     output_lines = []
 
