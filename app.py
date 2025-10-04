@@ -531,11 +531,32 @@ if st.session_state.is_running:
     if process:
         try:
             # stdoutからリアルタイムで1行ずつ読み込む
+            copy_button_text = translations.get(
+                                        "copy", "Copy")
+            copied_button_text = translations.get("copied", "Copied!")
             for line in iter(process.stdout.readline, ''):
                 if not line:
                     break
                 clean_line = strip_ansi_codes(line)
-
+                
+                # /connectコマンドを抽出
+                if "/connect" in clean_line:
+                    match = re.search(r"(/connect .*)", clean_line)
+                    if match:
+                        st.session_state.mc_connect_command = match.group(
+                            1).strip()
+                        st.write(translations.get(
+                            "mc_connect", "Connect from Minecraft with the following command:"))
+                        st.code(st.session_state.mc_connect_command,
+                                language=None, width="content")
+                        copy_text = st.session_state.mc_connect_command
+                        html_content = f"""
+                        <button onclick="
+                        navigator.clipboard.writeText('{copy_text}');
+                        this.innerHTML = '{copied_button_text}';">
+                        {copy_button_text}
+                        </button>
+                        """
                    # ROOM IDを抽出
                 if "ROOM ID:" in clean_line:
                     match = re.search(r"ROOM ID: (.*)", clean_line)
@@ -544,6 +565,14 @@ if st.session_state.is_running:
                         st.write("Room ID:")
                         st.code(st.session_state.room_id,
                                 language=None, width="content")
+                        copy_text = st.session_state.room_id
+                        html_content = f"""
+                        <button onclick="
+                        navigator.clipboard.writeText('{copy_text}');
+                        this.innerHTML = '{copied_button_text}';">
+                        {copy_button_text}
+                        </button>
+                        """
 
                 # URLを抽出
                 if "https://proximity-vc-mcbe.pages.dev" in clean_line:
@@ -555,18 +584,14 @@ if st.session_state.is_running:
                             "vc_url", "Participants should access this URL"))
                         st.code(st.session_state.vc_url,
                                 language=None, width="content")
-
-
-                # /connectコマンドを抽出
-                if "/connect" in clean_line:
-                    match = re.search(r"(/connect .*)", clean_line)
-                    if match:
-                        st.session_state.mc_connect_command = match.group(
-                            1).strip()
-                        st.write(translations.get(
-                            "mc_connect", "Connect from Minecraft with the following command:"))
-                        st.code(st.session_state.mc_connect_command,
-                                language=None, width="content")
+                        copy_text = st.session_state.vc_url
+                        html_content = f"""
+                        <button onclick="
+                        navigator.clipboard.writeText('{copy_text}');
+                        this.innerHTML = '{copied_button_text}';">
+                        {copy_button_text}
+                        </button>
+                        """
             
             # プロセスが自然に終了した場合の処理
             process.wait()
