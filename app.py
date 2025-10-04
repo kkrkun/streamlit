@@ -494,4 +494,3 @@ if st.session_state.is_running:
             # 正常終了でもエラーでも、必ず状態をリセットしてUIを元に戻す
             st.session_state.is_running = False
             st.session_state.process = None
-            st.rerun()
