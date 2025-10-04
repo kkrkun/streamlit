@@ -44,6 +44,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+"""
 # ScreenDataでウィンドウサイズを含む色々な値を取得
 screenData = st_screen_stats.ScreenData()
 # on_changeに関数を指定すると、ウィンドウサイズが変更されたときにその関数が呼ばれる。指定してもしなくても再実行される
@@ -53,6 +54,8 @@ if screen_stats_result is not None:
     width = screen_stats_result.get("innerWidth", 1920)
 else:
     width= 1920  # 初期値を設定（もしくは return で一時停止）
+"""
+
 # 1. ブラウザの言語設定を取得（ or "en" を削除）
 browser_lang_code = streamlit_js_eval(
     js_expressions="navigator.language", key="browser_lang")
@@ -240,7 +243,6 @@ with upload_col:
 
 # 2列目に言語選択ボックスを配置
 with lang_col:
-    st.write("")
     language = st.selectbox(
         label=translations.get("language", "Language:"),
         options=langs,
