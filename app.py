@@ -592,6 +592,12 @@ if st.session_state.is_running:
                         {copy_button_text}
                         </button>
                         """
+                        st.link_button(
+                            label=translations.get(
+                                "open_link", "Open link"),
+                            url=st.session_state.vc_url,
+                            icon="🔗",
+                        )
             
             # プロセスが自然に終了した場合の処理
             process.wait()
