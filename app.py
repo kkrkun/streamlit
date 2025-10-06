@@ -128,9 +128,21 @@ if st.session_state.upload_message:
     elif st.session_state.upload_message["type"] == "warning":
         st.warning(translations.get(
             "upload_error", "No common key was found."))
-
     # 一度表示したらメッセージを消去する（重要）
     st.session_state.upload_message = None
+
+if 'proxvc_finished' not in st.session_state:
+    st.session_state.proxvc_finished = None
+
+if st.session_state.proxvc_finished:
+    if st.session_state.proxvc_finished["type"] == "timeout":
+        st.error(translations.get(
+            "timeout", "The session has been terminated due to inactivity."))
+    elif st.session_state.proxvc_finished["type"] == "success":
+        st.success(translations.get(
+            "finished", "The world has been closed."))
+    # 一度表示したらメッセージを消去する（重要）
+    st.session_state.proxvc_finished = None
 
 DEF_CONFIG_FILE_PATH = "def-config.json"
 CONFIG_FILE_PATH = "config.json"
@@ -484,8 +496,6 @@ if not st.session_state.is_running:
                     st.stop()
 
         # プロセスを開始する
-        with st.spinner(translations.get("starting", "Starting...")):
-            time.sleep(3)
         st.session_state.is_running = True
 
         # Popenでプロセスを開始し、セッション状態に保存
@@ -513,7 +523,7 @@ else:
         with st.spinner(translations.get("stopping", "Stopping...")):
             time.sleep(3)
         st.rerun()
-
+    
 # --- 3. プロセスの出力表示（実行中のみ動作） ---
 if st.session_state.is_running:
     placeholder = st.empty()
@@ -531,7 +541,6 @@ if st.session_state.is_running:
             for line in iter(process.stdout.readline, ''):
                 if not line:
                     break
-                print(line)
                 if "[MC SSH]❌" in line:
                     st.error(translations.get(
                         "mc_connection_failed", "TCPexposer username, password, or Subdomain for Minecraft is incorrect."))
@@ -577,19 +586,28 @@ if st.session_state.is_running:
             # プロセスが自然に終了した場合の処理
             process.wait()
             stderr_output = process.stderr.read()
-            if process.returncode != 0:
+            if process.returncode == 124:
+                st.session_state.proxvc_finished = {
+                    "type": "timeout"
+                }
+                st.session_state.is_running = False
+                st.session_state.process = None
+                st.rerun()
+            elif process.returncode != 0:
                 st.error("エラーが発生しました:")
                 st.code(stderr_output)
                 # エラーログもsession_stateに追加して残す
                 st.session_state.output_lines.append("\n--- ERROR ---\n")
                 st.session_state.output_lines.append(stderr_output)
-            else:
-                st.success("Finish！")
-                time.sleep(2)
+                st.session_state.is_running = False
+                st.session_state.process = None
+            elif process.returncode == 0:
+                st.session_state.proxvc_finished = {
+                    "type": "success"
+                }
+                st.session_state.is_running = False
+                st.session_state.process = None
+                st.rerun()
 
         except Exception as e:
             st.error(f"Error: {e}")
-        finally:
-            # 正常終了でもエラーでも、必ず状態をリセットしてUIを元に戻す
-            st.session_state.is_running = False
-            st.session_state.process = None
