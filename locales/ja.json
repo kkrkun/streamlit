@@ -31,11 +31,15 @@
     "installing": "モジュールをインストール中... (初回は時間がかかることがあります)",
     "install_success": "モジュールのインストールが完了しました!",
     "install_failed": "モジュールのインストールに失敗しました",
+    "mc_connection_failed": "TCPexposerのユーザー名、パスワード、RoomIDのサブドメインのいずれかが違います",
+    "vc_connection_failed": "TCPexposerのユーザー名、パスワード、minecraftとの連携に使用するサブドメインのいずれかが違います",
     "vc_url": "参加者はこのURLにアクセスしてください",
     "mc_connect": "Minecraftから以下のコマンドで接続してください",
     "open_link": "開く",
     "start": "近接VCを開始",
     "stop": "近接VCを停止",
     "starting": "起動中...",
-    "stopping": "停止中..."
+    "stopping": "停止中...",
+    "timeout": "一定時間操作が無かったため強制終了しました",
+    "finished": "ワールドが閉じられため終了しました"
 }
