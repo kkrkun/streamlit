@@ -31,11 +31,15 @@
     "installing": "Installing...",
     "install_success": "Installation succeeded.",
     "install_failed": "Installation failed.",
+    "mc_connection_failed": "TCPexposer username, password, or Subdomain for Minecraft is incorrect.",
+    "vc_connection_failed": "TCPexposer username, password, or Subdomain for RoomID is incorrect.",
     "vc_url": "Participants should access this URL",
     "mc_connect": "Connect from Minecraft with the following command:",
     "open_link": "Open Link",
     "start": "Start Proximity VC",
     "stop": "Stop Proximity VC",
     "stopping": "Stopping...",
-    "starting": "Starting..."
+    "starting": "Starting...",
+    "timeout" :"The session has been terminated due to inactivity.",
+    "finished": "The world has been closed."
 }
