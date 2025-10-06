@@ -229,9 +229,9 @@ if 'vc_url' not in st.session_state:
     st.session_state.vc_url = None
 if 'mc_connect_command' not in st.session_state:
     st.session_state.mc_connect_command = None
-    
+
 # 2つの列を作成
-upload_col, lang_col= st.columns(2)
+upload_col, lang_col = st.columns(2)
 
 # 1列目にファイルアップローダーを配置
 with upload_col:
@@ -256,7 +256,7 @@ with lang_col:
         key="lang",
         disabled=st.session_state.is_running
     )
-    
+
 
 prox_col, dis_col, pass_col, spec_col = st.columns([1.3, 1.5, 2, 2])
 with prox_col:
@@ -428,6 +428,7 @@ if st.session_state.show_download:
         "lang": "{new_config["lang"]}"   // 表示言語の設定 ("ja" または "en")// Language setting ("ja" or "en")
     }}
     """
+
     st.download_button(
         label=translations.get("download_config", "Download Config File"),
         data=config_string,
@@ -440,12 +441,6 @@ else:
     # 初回の一瞬だけ表示
     st.info("Loading download button...")
     st.session_state.show_download = True
-
-# ANSIコードを除去する関数（仮置き）
-def strip_ansi_codes(text):
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    return ansi_escape.sub('', text)
-
 
 if not st.session_state.is_running:
     new_config = change_config()
@@ -478,11 +473,13 @@ if not st.session_state.is_running:
                         text=True,           # テキストモードで扱う
                         check=True           # エラー時に例外を発生させる
                     )
-                    st.success(translations.get("install_success", "Installation succeeded."))
+                    st.success(translations.get(
+                        "install_success", "Installation succeeded."))
 
                 except subprocess.CalledProcessError as e:
                     # 3. インストールに失敗した場合、エラーを表示して停止
-                    st.error(translations.get("install_failed", "Installation failed."))
+                    st.error(translations.get(
+                        "install_failed", "Installation failed."))
                     st.code(e.stderr)
                     st.stop()
 
@@ -531,17 +528,19 @@ if st.session_state.is_running:
     if process:
         try:
             # stdoutからリアルタイムで1行ずつ読み込む
-            copy_button_text = translations.get(
-                                        "copy", "Copy")
-            copied_button_text = translations.get("copied", "Copied!")
             for line in iter(process.stdout.readline, ''):
                 if not line:
                     break
-                clean_line = strip_ansi_codes(line)
-                
+                print(line)
+                if "[MC SSH]❌" in line:
+                    st.error(translations.get(
+                        "mc_connection_failed", "TCPexposer username, password, or Subdomain for Minecraft is incorrect."))
+                if "[VC SSH]❌ " in line:
+                    st.error(translations.get(
+                        "vc_connection_failed", "TCPexposer username, password, or Subdomain for RoomID is incorrect."))
                 # /connectコマンドを抽出
-                if "/connect" in clean_line:
-                    match = re.search(r"(/connect .*)", clean_line)
+                if "/connect" in line:
+                    match = re.search(r"(/connect .*)", line)
                     if match:
                         st.session_state.mc_connect_command = match.group(
                             1).strip()
@@ -549,56 +548,32 @@ if st.session_state.is_running:
                             "mc_connect", "Connect from Minecraft with the following command:"))
                         st.code(st.session_state.mc_connect_command,
                                 language=None, width="content")
-                        copy_text = st.session_state.mc_connect_command
-                        html_content = f"""
-                        <button onclick="
-                        navigator.clipboard.writeText('{copy_text}');
-                        this.innerHTML = '{copied_button_text}';">
-                        {copy_button_text}
-                        </button>
-                        """
                    # ROOM IDを抽出
-                if "ROOM ID:" in clean_line:
-                    match = re.search(r"ROOM ID: (.*)", clean_line)
+                if "ROOM ID:" in line:
+                    match = re.search(r"ROOM ID: (.*)", line)
                     if match:
                         st.session_state.room_id = match.group(1).strip()
                         st.write("Room ID:")
                         st.code(st.session_state.room_id,
                                 language=None, width="content")
-                        copy_text = st.session_state.room_id
-                        html_content = f"""
-                        <button onclick="
-                        navigator.clipboard.writeText('{copy_text}');
-                        this.innerHTML = '{copied_button_text}';">
-                        {copy_button_text}
-                        </button>
-                        """
 
                 # URLを抽出
-                if "https://proximity-vc-mcbe.pages.dev" in clean_line:
+                if "https://proximity-vc-mcbe.pages.dev" in line:
                     match = re.search(
-                        r"(https://proximity-vc-mcbe\.pages\.dev\?roomid=\w+)", clean_line)
+                        r"(https://proximity-vc-mcbe\.pages\.dev\?roomid=\w+)", line)
                     if match:
                         st.session_state.vc_url = match.group(1).strip()
                         st.write(translations.get(
                             "vc_url", "Participants should access this URL"))
                         st.code(st.session_state.vc_url,
                                 language=None, width="content")
-                        copy_text = st.session_state.vc_url
-                        html_content = f"""
-                        <button onclick="
-                        navigator.clipboard.writeText('{copy_text}');
-                        this.innerHTML = '{copied_button_text}';">
-                        {copy_button_text}
-                        </button>
-                        """
                         st.link_button(
                             label=translations.get(
                                 "open_link", "Open link"),
                             url=st.session_state.vc_url,
                             icon="🔗",
                         )
-            
+
             # プロセスが自然に終了した場合の処理
             process.wait()
             stderr_output = process.stderr.read()
