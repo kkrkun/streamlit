@@ -9,7 +9,9 @@
     "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx & tsc"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "@discordjs/voice": "^0.18.0",
+    "discord.js": "^14.19.3",
+    "express": "^4.21.2",
     "flatted": "^3.3.3",
     "fs": "^0.0.1-security",
     "get-port": "^4.2.0",
@@ -17,7 +19,7 @@
     "moment-timezone": "^0.5.41",
     "node-fetch": "^2.7.0",
     "path": "^0.12.7",
-    "socket-be": "^2.1.0",
+    "socket-be": "^2.3.1",
     "ssh2": "^1.17.0",
     "wanakana": "^5.3.1",
     "ws": "^8.18.2"
