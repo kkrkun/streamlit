@@ -15,6 +15,7 @@
     "specDim_col": "スペクテイター同士のVCをディメンションごとに分けるか",
     "specListen_col": "スペクテイターが他モードプレイヤーの会話を聞けるようにするか",
     "advanced_settings": "詳細設定",
+    "advanced_settings_description": "[やり方はこちら](https://qiita.com/kkryade1212/items/4cc17cff7ef97dbf6d4b)",
     "tcp_exposer_settings_title": "TCP Exposer設定",
     "tcp_exposer_settings_description": "Minecraftの/connectやVC接続でルームIDを固定する時に設定します",
     "username_col": "TCP Exposerのユーザー名",

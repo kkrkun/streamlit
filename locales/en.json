@@ -15,6 +15,7 @@
     "specDim_col": "Separate spectator VC by dimension",
     "specListen_col": "Allow spectators to hear non-spectator players",
     "advanced_settings": "Advanced Settings",
+    "advanced_settings_description": "[How to do it is here](https://dev.to/kkr1212/minecraft-be-proximity-voice-chat-advanced-settings-598e)",
     "tcp_exposer_settings_title": "TCP Exposer Settings",
     "tcp_exposer_settings_description": "Used to fix the room ID for Minecraft /connect or VC connections",
     "username_col": "TCP Exposer Username",
@@ -40,6 +41,6 @@
     "stop": "Stop Proximity VC",
     "stopping": "Stopping...",
     "starting": "Starting...",
-    "timeout" :"The session has been terminated due to inactivity.",
+    "timeout": "The session has been terminated due to inactivity.",
     "finished": "The world has been closed."
 }

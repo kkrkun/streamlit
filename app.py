@@ -8,6 +8,9 @@ import json5
 from streamlit_js_eval import streamlit_js_eval
 import st_screen_stats
 import streamlit.components.v1 as components
+from pathlib import Path
+
+script_dir = Path(__file__).parent
 
 st.markdown("""
     <style>
@@ -72,14 +75,14 @@ def load_translations(lang_code):
 
     # 1. 指定された言語のファイルを読み込み試行
     try:
-        path = f'locales/{lang_to_load}.json'
+        path = script_dir / 'locales' / f'{lang_to_load}.json'
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
 
         # 2. 失敗した場合、デフォルトの言語ファイルを読み込む
         try:
-            path = f'locales/{default_lang}.json'
+            path = script_dir / 'locales' / f'{lang_to_load}.json'
             with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
@@ -333,6 +336,9 @@ if not st.session_state.spectator:
     specListen = False
 
 with st.expander(translations.get("advanced_settings", "Advanced Settings")):
+    st.write(f"#### {translations.get("advanced_settings_description", "[How to do it is here](https://dev.to/kkr1212/minecraft-be-proximity-voice-chat-advanced-settings-598e)")}",
+        unsafe_allow_html=True
+    )
     f"### {translations.get('tcp_exposer_settings_title', 'TCP Exposer Settings')}"
     f"{translations.get("tcp_exposer_settings_description", "Used to fix the room ID for Minecraft /connect or VC connections")}"
     username_col, tcp_pass_col = st.columns(2)
@@ -472,8 +478,9 @@ if not st.session_state.is_running:
         st.session_state.room_id = None
         st.session_state.vc_url = None
         st.session_state.mc_connect_command = None
+        node_modules_path = script_dir / 'node_modules'
         # 1. node_modulesディレクトリが存在するかチェック
-        if not os.path.isdir('node_modules'):
+        if not node_modules_path.is_dir():
             st.info(translations.get("install",
                     "The required module was not found. Starting installation..."))
             with st.spinner(translations.get("installing", "Installing...")):
@@ -483,7 +490,8 @@ if not st.session_state.is_running:
                         ['npm', 'install'],
                         capture_output=True,  # 標準出力をキャプチャ
                         text=True,           # テキストモードで扱う
-                        check=True           # エラー時に例外を発生させる
+                        check=True,           # エラー時に例外を発生させる
+                        cwd=script_dir
                     )
                     st.success(translations.get(
                         "install_success", "Installation succeeded."))
@@ -505,7 +513,8 @@ if not st.session_state.is_running:
             stderr=subprocess.PIPE,
             text=True,
             encoding='utf-8',
-            bufsize=1
+            bufsize=1,
+            cwd=script_dir
         )
         st.session_state.process = process
         st.rerun()  # 画面を再描画して「実行中」のUIに切り替える
